@@ -6,5 +6,6 @@ Docker volume mapping command:
 
 install virtual environment in python:
 pip install uv
-
 uv init --python 3.13
+
+List all dockers: docker ps -a
