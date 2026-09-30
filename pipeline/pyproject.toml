@@ -2,7 +2,7 @@
 name = "pipeline"
 version = "0.1.0"
 description = "Add your description here"
-readme = "README.md"
+
 authors = [
     { name = "dhirajtripathi93", email = "dhirajtripathi93@gmail.com" }
 ]
