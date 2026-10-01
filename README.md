@@ -37,7 +37,7 @@ Make sure to use the network command (--network=host ) to ensure the taxi_ingest
 
 Alternatively you can use network = pgnetwork in both containers postgreSQL and taxi_ingest. The idea is for them to be on the shared network to communicate.
 
-If the Pg admin tool does not work in windows try changing the hostname to : 172.0.0.1 instead of pgdatabase in the pgadmin tool 
+If the Pg admin tool does not work in windows try changing the hostname to : 172.17.0.1 instead of pgdatabase in the pgadmin tool 
 
 
 
