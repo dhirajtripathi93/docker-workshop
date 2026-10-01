@@ -33,6 +33,7 @@ services:
     tty: true
 
   taxi_ingest:
+    build: .
     image: taxi_ingest:v001
     container_name: taxi_ingest
     network_mode: "host"
