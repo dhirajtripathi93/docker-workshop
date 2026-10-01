@@ -24,6 +24,10 @@ Make sure to use the network command (--network=host ) to ensure the taxi_ingest
 
  $ docker run --rm -it \
   --network=host \
+
+
+If the Pg admin tool does not work in windows try changing the hostname to : 172.0.0.1 instead of pgdatabase in the pgadmin tool 
+
   taxi_ingest:v001 \
   --pg-user=root \
   --pg-pass=root \
