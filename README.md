@@ -18,3 +18,18 @@ docker run -it --rm \
   -v ny_taxi_postgres_data:/var/lib/postgresql \
   -p 5432:5432 \
   postgres:18
+
+
+Make sure to use the network command (--network=host ) to ensure the taxi_ingest docker and PostgreSQL docker communicate:
+
+ $ docker run --rm -it \
+  --network=host \
+  taxi_ingest:v001 \
+  --pg-user=root \
+  --pg-pass=root \
+  --pg-host=localhost \
+  --pg-port=5432 \
+  --pg-db=ny_taxi \
+  --target-table=yellow_taxi_trips \
+  --year=2021 \
+  --month=1
