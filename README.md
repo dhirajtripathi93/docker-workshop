@@ -33,3 +33,6 @@ Make sure to use the network command (--network=host ) to ensure the taxi_ingest
   --target-table=yellow_taxi_trips \
   --year=2021 \
   --month=1
+
+
+Alternatively you can use network = pgnetwork in both containers postgreSQL and taxi_ingest. The idea is for them to be on the shared network to communicate.
