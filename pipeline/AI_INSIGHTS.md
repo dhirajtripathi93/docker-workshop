@@ -8,53 +8,68 @@ Red dots represent flagged records matching strict error criteria (e.g., negativ
 ![Distance vs Fare](images/anomaly_scatter.png)
 
 ## 🤖 OpenAI Quality Check
-Based on the flagged NYC taxi data sample provided, we can identify several rows that contain physically impossible or highly anomalous information based on standard taxi operations. Below is an analysis of each relevant row:
+The flagged NYC taxi data sample includes several rows that indicate potential anomalies or physical impossibilities based on standard taxi operations. Here are the specific rows that stand out and the reasons for their anomalies:
 
-1. **Row 1: Long Trip with Short Time**
-   - **Pickup:** 2021-01-01 10:49:14
-   - **Dropoff:** 2021-01-01 11:52:48
-   - **Passenger Count:** 1
-   - **Trip Distance:** 45.92 miles
-   - **Trip Duration:** 1 hour, 3 minutes
-  
-   **Analysis:** It's highly unusual for a taxi trip to cover nearly 46 miles within New York City boundaries in just over an hour. While this could theoretically occur if traveling to a location far outside NYC or during very light traffic conditions, the distance suggests it’s likely a more than average trip. Typically, trips of this distance would reflect into longer time durations considering the heavy traffic in NYC.
+1. **Row 6082 and Row 3705 (Long Trip Distances with Unusual Rates)**
+   - **Row 6082**: 45.92 miles with a fare of $121.0 in about 63 minutes suggests a trip that is theoretically plausible but highly improbable for a taxi operation in NYC. Even if this were an airport run or long-distance trip, such a distance would typically accrue significantly more in fare due to the nature of taxi regulations and fare structuring in NYC.
+   - **Row 3705**: 33.80 miles and a fare of $121.0 also raises questions, as this fare would not typically cover such a distance unless it involved specific conditions, like being outside the regular fare zones or special circumstances (e.g., high surcharges).
 
-2. **Row 3: Long Trip with Short Time**
-   - **Pickup:** 2021-01-01 06:16:56
-   - **Dropoff:** 2021-01-01 06:55:47
-   - **Passenger Count:** 1
-   - **Trip Distance:** 33.09 miles
-   - **Trip Duration:** Approx. 39 minutes
+2. **Rows with Zero Trip Distances**:
+   - **Row 2596, Row 3770, Row 8707, Row 3017, Row 7064, Row 3378, Row 4812, Row 9027, Row 5027, Row 2936**: All these rows have a `trip_distance` of 0.00 miles and still show a fare being charged (e.g., $100.0, $90.0, etc.). This indicates that these trips could either be erroneous data entries or instances of "phantom" trips. In a normal operational context, a taxi cannot charge a fare without actually moving. Meanwhile, these rows display normal timestamps for pickup and drop-off, suggesting an illogical charge for a non-existent trip.
 
-   **Analysis:** A journey covering over 33 miles in only 39 minutes is also highly suspect in NYC, where traffic often standards would lead to longer trip durations. This again implies a location far beyond the usual taxi territory without adequate justification.
+3. **Outlier Trip Durations**:
+   - **Row 6082**: The trip duration is around 63 minutes for a distance of about 46 miles, which, while achievable, is still quite elongated for NYC traffic conditions. In comparison, Row 3705 shows a trip just under 27 minutes for over 33 miles, which is unrealistically fast if it indeed started within NYC limits.
+   - In general, trips that stretch into long times but with high fares need careful review, especially against travel speed limits within NYC.
 
-3. **Row 4: Short Trip Duration with Long Time**
-   - **Pickup:** 2021-01-01 01:28:39
-   - **Dropoff:** 2021-01-01 01:32:05
-   - **Passenger Count:** 1
-   - **Trip Distance:** 0.34 miles
-   - **Trip Duration:** 3 minutes
+4. **Inconsistent Rate Codes**:
+   - The `RatecodeID` for trips that have unusually long distances (Row 6082 with Ratecode 1 and Row 3705 with Ratecode 4 are in cases) should potentially align with the respective fare structures based on distance, hours, and zones. The coding in Row 3705 with a quoted rate that doesn’t correlate with the distance makes it suspicious.
 
-   **Analysis:** While a short trip itself is not anomalous, the dropped-off location should ideally be within NYC's expected range for a short drive. A taxi typically wouldn't take 3 minutes to drive 0.34 miles unless it is in an exceptionally congested area, which might also not support such a fare.
+5. **Short Duration Relative to Distance**:
+   - Some rows that entail short temporal durations yet lengthy distances (like Row 3705 which is nearly half an hour with a high distance) raise additional doubts not just on fare accuracy, but on if the trip even occurred as described.
 
-4. **Rows with Zero Trip Distance:**
-   - **Rows 6 (0.00, Trip Duration: 12 seconds), 7, 8 (0.00, Trip Duration: 12 seconds), and 10 (0.00, Trip Duration: 29 seconds) are instances of trips showing zero miles.**
-
-   **Analysis:** These trips show a trip distance of 0.00 miles yet still have a start and end time, which indicates the taxi has effectively not moved or traveled any distance. While short stops are common (like dropping a passenger off at a curb), the fare charged for a zero-distance trip with significant charges implies a malfunction in the system. Taxi trips must cover distance to have a fair calculation in NYC.
-
-5. **Row 10: Unusual Trip with Low Distance and Excessive Charges**
-   - **Pickup:** 2021-01-01 08:38:30
-   - **Dropoff:** 2021-01-01 08:38:57
-   - **Passenger Count:** 1
-   - **Trip Distance:** 0.00 miles
-   - **Fare Amount:** 61.0
-
-   **Analysis:** A fare of $61.00 for what is reported as a zero-distance trip is exceedingly high, particularly in the context of NYC standard fares. This could indicate an error in reporting or a fare calculation fault.
-
-Overall, the flagged rows illustrate significant anomalies in trip distances associated with either impractical travel times or calculations that do not match expected outcomes of the taxi operational environment in NYC. Such rows should prompt further investigation to find validation or possible data entry errors.
+### Summary:
+Many flagged entries manifest inconsistencies that defy standard taxi operations, including impossible trip distances, zero distances with charging fares, anomalous trip durations for given distances, and mismatches in expected fare structures based on taxi regulations. These aspects warrant further investigation to validate the data entries' integrity, particularly examining system errors or misuse within the NYC taxi fare system.
 
 ## 🧠 Anthropic Quality Check
-Anthropic API key missing or request failed.
+# Analysis of Flagged NYC Taxi Data Anomalies
+
+## Critical Issues Identified
+
+### **1. Zero-Distance Trips with High Fares (Rows 2596, 3770, 8707, 3017, 7064, 3378, 9027, 5027, 4812, 3011)**
+
+**The Problem:**
+- Trip distance = 0.00 miles, yet fare amounts range from $55–$105
+- Pickup and dropoff locations are identical (PULocationID = DOLocationID)
+- Duration ranges from 3 seconds to 44 minutes
+
+**Why This Is Impossible:**
+- NYC taxi meters don't charge base fares of $55–$105; the standard base fare is ~$2.50
+- These fares suggest either:
+  - **Fraudulent meter manipulation** (driver manually entered inflated amounts)
+  - **Data recording errors** (fare data from different trip mixed with distance data)
+  - **No actual trip occurred** (money charged without service rendered)
+
+---
+
+### **2. Extreme Distance-to-Fare Mismatches (Rows 6082, 3705, 4292)**
+
+**The Problem:**
+- Row 6082: 45.92 miles but only $121 fare (should be ~$150–$180)
+- Row 3705: 33.80 miles but $121 fare (rate code 4 applies)
+- Row 4292: 33.09 miles but only $114 fare
+
+**Why This Is Anomalous:**
+- Fares don't scale appropriately with distance
+- Suggests either compressed meter readings or fare tampering
+- Row 3705 uses RateCodeID=4 (airport/negotiated), but distance/fare still seems artificially low
+
+---
+
+### **3. Illogical Tip Patterns**
+
+**Rows with Extreme Tip-to-Fare Ratios:**
+- Row 1318: 4-minute trip, $105 fare, $21.06 tip (20% tip on suspicious base fare)
+- Row 4292: $114 fare, $22.96 tip (20
 
 ## 📋 Raw Suspicious Data
 |      |   VendorID | tpep_pickup_datetime   | tpep_dropoff_datetime   |   passenger_count |   trip_distance |   RatecodeID | store_and_fwd_flag   |   PULocationID |   DOLocationID |   payment_type |   fare_amount |   extra |   mta_tax |   tip_amount |   tolls_amount |   improvement_surcharge |   total_amount |   congestion_surcharge |

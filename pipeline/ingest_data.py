@@ -12,11 +12,17 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Initialize clients securely from environment variables
-openai_api_key = os.getenv("OPENAI_API_KEY")
+# Initialize clients securely and strip ALL quotes/spaces passed by Docker
+oai_env = os.getenv("OPENAI_API_KEY")
+openai_api_key = oai_env.strip().strip("\"'") if oai_env else None
 openai_client = OpenAI(api_key=openai_api_key) if openai_api_key else None
 
-anthropic_api_key = os.getenv("ANTHROPIC_API_KEY")
+ant_env = os.getenv("ANTHROPIC_API_KEY")
+anthropic_api_key = ant_env.strip().strip("\"'") if ant_env else None
 anthropic_client = anthropic.Anthropic(api_key=anthropic_api_key) if anthropic_api_key else None
+
+print(f"\n[SYSTEM] OpenAI Key Loaded: {'✅ YES' if openai_client else '❌ NO'}")
+print(f"[SYSTEM] Anthropic Key Loaded: {'✅ YES' if anthropic_client else '❌ NO'}\n")
 
 def detect_anomalies(df_sample, suspicious_sample):
     print("\n--- Generating Visualizations ---")
@@ -58,7 +64,7 @@ def detect_anomalies(df_sample, suspicious_sample):
     if anthropic_client:
         try:
             ant_res = anthropic_client.messages.create(
-                model="claude-3-haiku-20240307",
+                model="claude-haiku-4-5-20251001",
                 max_tokens=500,
                 messages=[{"role": "user", "content": prompt}]
             )
